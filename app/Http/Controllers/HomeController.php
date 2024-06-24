@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Role;
 
 class HomeController extends Controller
 {
@@ -19,5 +19,10 @@ class HomeController extends Controller
     public function contact()
     {
         return view('contact');
+    }
+
+    public function dashboard()
+    {
+        return view('dashboard');
     }
 }
