@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\AccountantController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SAController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index']);
@@ -17,3 +19,8 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__ . '/auth.php';
+
+Route::get('/organizers', [SAController::class, 'organizer'])->middleware('can:Admin', 'auth', 'verified')->name('organizer');
+
+Route::get('/invoice', [AccountantController::class, 'invoice'])->middleware('can:Accountant', 'auth', 'verified')->name('invoice');
+Route::post('/showinvoice', [AccountantController::class, 'show'])->middleware('can:Accountant', 'auth', 'verified')->name('showinvoice');

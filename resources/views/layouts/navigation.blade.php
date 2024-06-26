@@ -15,6 +15,20 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+
+                    @auth
+                        @if (request()->user()->role->name === 'Super Admin')
+                            <x-nav-link :href="route('organizer')" :active="request()->routeIs('organizer')">
+                                {{ __('Organizers') }}
+                            </x-nav-link>
+                        @endif
+
+                        @if (request()->user()->role->name === 'Super Admin' || request()->user()->role->name === 'Accountant')
+                            <x-nav-link :href="route('invoice')" :active="request()->routeIs('invoice')">
+                                {{ __('Invoice') }}
+                            </x-nav-link>
+                        @endif
+                    @endauth
                 </div>
             </div>
 
@@ -85,6 +99,20 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+            @auth
+                @if (request()->user()->role->name === 'Super Admin')
+                    <x-responsive-nav-link :href="route('organizer')" :active="request()->routeIs('organizer')">
+                        {{ __('Organizers') }}
+                    </x-responsive-nav-link>
+                @endif
+
+                @if (request()->user()->role->name === 'Super Admin' || request()->user()->role->name === 'Accountant')
+                    <x-responsive-nav-link :href="route('invoice')" :active="request()->routeIs('invoice')">
+                        {{ __('Invoice') }}
+                    </x-responsive-nav-link>
+                @endif
+            @endauth
         </div>
 
         <!-- Responsive Settings Options -->
