@@ -55,7 +55,8 @@
                                                                 :name="'items[' + index + '][description]'"
                                                                 x-model="row.description"
                                                                 class="w-full dark:bg-gray-700 dark:text-white"
-                                                                list="items" @input="updateItem(index)" required>
+                                                                list="items" @input="updateItem(index)" autofocus
+                                                                required>
                                                             <datalist id="items">
                                                                 <template x-for="item in items">
                                                                     <option :value="item.name" x-text="item.name">
@@ -76,10 +77,10 @@
                                                                 @input="calculateAmount(index)" required>
                                                         </td>
                                                         <td class="border px-4 py-2">
-                                                            <input type="" :name="'items[' + index + '][rate]'"
-                                                                x-model="row.rate"
-                                                                step="0.00000000000000000000000000000000000000000000000000000000000000000000000000000000001"
-                                                                class="w-full dark:bg-gray-700 dark:text-white" required>
+                                                            <input type="number" :name="'items[' + index + '][rate]'"
+                                                                x-model="row.rate" step="0.01"
+                                                                class="w-full dark:bg-gray-700 dark:text-white" required
+                                                                readonly>
                                                         </td>
                                                         <td class="border px-4 py-2">
                                                             <input type="number" :name="'items[' + index + '][discount]'"
@@ -115,21 +116,37 @@
                                                                 <option value="28%">28%</option>
                                                             </datalist>
                                                             <span>Tax Amount:</span>
-                                                            <input type="number" x-model="tax.rate" name="tax_amount"
-                                                                class="w-1/4 ml-2 dark:bg-gray-700 dark:text-white"
-                                                                readonly>
+                                                            <input type="number" x-model="tax.rate" name="taxamount"
+                                                                class="w-1/4 ml-2 dark:bg-gray-700 dark:text-white">
                                                         </div>
                                                     </td>
                                                 </tr>
                                                 <!-- Sum Total Row -->
                                                 <tr>
-                                                    <td colspan="6" class="border px-4 py-2 text-right font-bold">Total:
+                                                    <td class="border-l border-b px-4 py-2 text-right font-bold">Total:
                                                     </td>
-                                                    <td colspan="2" class="border px-4 py-2">
+                                                    <td class="border-b  px-4 py-2">
                                                         <input type="number" x-model="total" name="total"
                                                             class="w-full dark:bg-gray-700 dark:text-white" readonly>
                                                     </td>
-                                                    {{-- <td class="border px-4 py-2"></td> --}}
+
+                                                    <td colspan="2" class="border-l border-b text-right px-4 py-2">
+                                                        Rounded off
+                                                        Amount:</td>
+                                                    <td class="border-b px-4 py-2">
+                                                        <input type="number"
+                                                            x-model="(Math.round(total) - total).toFixed(3)"
+                                                            name="round_off_total"
+                                                            class="w-full dark:bg-gray-700 dark:text-white" readonly>
+                                                    </td>
+
+                                                    <td class="border-l border-b text-right px-4 py-2">Amount to Pay:
+                                                    </td>
+                                                    <td colspan="2" class="border-b border-r px-4 py-2">
+                                                        <input type="number" x-model="Math.round(total)"
+                                                            name="total_amount_pay"
+                                                            class="w-full dark:bg-gray-700 dark:text-white" readonly>
+                                                    </td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -196,9 +213,6 @@
                                                 let subtotal = this.rows.reduce((sum, row) => sum + row.amount, 0);
                                                 let taxAmount = subtotal * (this.tax.rate / 100);
                                                 this.total = subtotal + taxAmount;
-                                            },
-                                            taxAmount() {
-                                                calculateTotal() - calculateTotal().rows.reduce((sum, row) => sum + row.amount, 0);
                                             }
                                         }
                                     }

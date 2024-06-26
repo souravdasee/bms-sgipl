@@ -18,8 +18,8 @@ class ItemFactory extends Factory
     {
         return [
             'name' => fake()->unique()->word,
-            'hsn_sac' => fake()->unique()->randomNumber(),
-            'rate' => fake()->randomFloat(),
+            'hsn_sac' => fake()->unique()->numberBetween(111121, 989898),
+            'rate' => fake()->randomFloat(2, 1000, 5000),
         ];
     }
 }

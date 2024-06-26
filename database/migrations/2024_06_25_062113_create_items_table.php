@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('items', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->string('hsn_sac')->unique();
-            $table->string('rate');
+            $table->integer('hsn_sac')->unique();
+            $table->double('rate');
             $table->timestamps();
         });
     }
