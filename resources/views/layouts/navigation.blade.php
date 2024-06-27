@@ -24,8 +24,8 @@
                         @endif
 
                         @if (request()->user()->role->name === 'Super Admin' || request()->user()->role->name === 'Accountant')
-                            <x-nav-link :href="route('invoice')" :active="request()->routeIs('invoice')">
-                                {{ __('Invoice') }}
+                            <x-nav-link :href="route('accountant')" :active="request()->routeIs('accountant')">
+                                {{ __('Accountant') }}
                             </x-nav-link>
                         @endif
                     @endauth
@@ -108,8 +108,8 @@
                 @endif
 
                 @if (request()->user()->role->name === 'Super Admin' || request()->user()->role->name === 'Accountant')
-                    <x-responsive-nav-link :href="route('invoice')" :active="request()->routeIs('invoice')">
-                        {{ __('Invoice') }}
+                    <x-responsive-nav-link :href="route('accountant')" :active="request()->routeIs('accountant')">
+                        {{ __('Accountant') }}
                     </x-responsive-nav-link>
                 @endif
             @endauth

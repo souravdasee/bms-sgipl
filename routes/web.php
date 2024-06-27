@@ -22,5 +22,6 @@ require __DIR__ . '/auth.php';
 
 Route::get('/organizers', [SAController::class, 'organizer'])->middleware('can:Admin', 'auth', 'verified')->name('organizer');
 
+Route::get('/accountant', [AccountantController::class, 'index'])->middleware('can:Accountant', 'auth', 'verified')->name('accountant');
 Route::get('/invoice', [AccountantController::class, 'invoice'])->middleware('can:Accountant', 'auth', 'verified')->name('invoice');
 Route::post('/showinvoice', [AccountantController::class, 'show'])->middleware('can:Accountant', 'auth', 'verified')->name('showinvoice');

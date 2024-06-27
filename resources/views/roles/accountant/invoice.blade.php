@@ -34,6 +34,7 @@
 
                                     <form method="POST" action="/showinvoice">
                                         @csrf
+
                                         <table class="min-w-full bg-white dark:bg-gray-800">
                                             <thead class="bg-gray-800 text-white">
                                                 <tr>
@@ -67,8 +68,7 @@
                                                         <td class="border px-4 py-2">
                                                             <input type="text" :name="'items[' + index + '][hsn_sac]'"
                                                                 x-model="row.hsn_sac"
-                                                                class="w-full dark:bg-gray-700 dark:text-white" required
-                                                                readonly>
+                                                                class="w-full dark:bg-gray-700 dark:text-white" readonly>
                                                         </td>
                                                         <td class="border px-4 py-2">
                                                             <input type="number" :name="'items[' + index + '][quantity]'"
@@ -79,26 +79,28 @@
                                                         <td class="border px-4 py-2">
                                                             <input type="number" :name="'items[' + index + '][rate]'"
                                                                 x-model="row.rate" step="0.01"
-                                                                class="w-full dark:bg-gray-700 dark:text-white" required
-                                                                readonly>
+                                                                class="w-full dark:bg-gray-700 dark:text-white" readonly>
                                                         </td>
                                                         <td class="border px-4 py-2">
-                                                            <select :name="'items[' + index + '][discount_type]'"
-                                                                x-model="row.discount_type" @change="calculateAmount(index)"
-                                                                class="w-full dark:bg-gray-700 dark:text-white">
-                                                                <option value="percentage">Percentage</option>
-                                                                <option value="amount">INR</option>
-                                                            </select>
-                                                            <input type="number" :name="'items[' + index + '][discount]'"
-                                                                x-model="row.discount"
-                                                                class="w-full dark:bg-gray-700 dark:text-white"
-                                                                @input="calculateAmount(index)">
+                                                            <div class="flex">
+                                                                <select :name="'items[' + index + '][discount_type]'"
+                                                                    x-model="row.discount_type"
+                                                                    class="w-1/2 dark:bg-gray-700 dark:text-white"
+                                                                    @change="calculateAmount(index)">
+                                                                    <option value="percentage">%</option>
+                                                                    <option value="fixed">INR</option>
+                                                                </select>
+                                                                <input type="number"
+                                                                    :name="'items[' + index + '][discount]'"
+                                                                    x-model="row.discount"
+                                                                    class="w-1/2 dark:bg-gray-700 dark:text-white"
+                                                                    @input="calculateAmount(index)">
+                                                            </div>
                                                         </td>
                                                         <td class="border px-4 py-2">
                                                             <input type="number" :name="'items[' + index + '][amount]'"
                                                                 x-model="row.amount"
-                                                                class="w-full dark:bg-gray-700 dark:text-white" required
-                                                                readonly>
+                                                                class="w-full dark:bg-gray-700 dark:text-white" readonly>
                                                         </td>
                                                         <td class="border px-4 py-2 text-center">
                                                             <button type="button"
@@ -107,6 +109,30 @@
                                                         </td>
                                                     </tr>
                                                 </template>
+
+                                                <!-- Optional Expense Row -->
+                                                <template x-for="(expense, eindex) in expenses" :key="eindex">
+                                                    <tr>
+                                                        <td colspan="6" class="border px-4 py-2">
+                                                            <div class="flex justify-between">
+                                                                <input type="text" x-model="expense.description"
+                                                                    :name="'expenses[' + eindex + '][description]'"
+                                                                    class="w-3/4 dark:bg-gray-700 dark:text-white"
+                                                                    placeholder="Name of Expense">
+                                                                <input type="number" x-model="expense.amount"
+                                                                    :name="'expenses[' + eindex + '][amount]'"
+                                                                    class="w-1/4 dark:bg-gray-700 dark:text-white"
+                                                                    @input="calculateTotal">
+                                                            </div>
+                                                        </td>
+                                                        <td class="border px-4 py-2 text-center">
+                                                            <button type="button"
+                                                                class="bg-red-500 text-white px-2 py-1 rounded"
+                                                                @click="removeExpenseRow(eindex)">Remove</button>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+
                                                 <!-- Optional Tax Row -->
                                                 <tr>
                                                     <td colspan="8" class="border px-4 py-2">
@@ -126,74 +152,52 @@
                                                                 class="w-1/4 ml-2 dark:bg-gray-700 dark:text-white"
                                                                 readonly>
                                                         </div>
-                                                        <div class="flex justify-between mt-2" x-show="isSameState">
-                                                            <span>CGST:</span>
-                                                            <input type="number" x-model="tax.cgst" name="cgst"
-                                                                class="w-1/4 ml-2 dark:bg-gray-700 dark:text-white"
-                                                                readonly>
-                                                            <span>SGST:</span>
-                                                            <input type="number" x-model="tax.sgst" name="sgst"
-                                                                class="w-1/4 ml-2 dark:bg-gray-700 dark:text-white"
-                                                                readonly>
-                                                        </div>
-                                                        <div class="flex justify-between mt-2" x-show="!isSameState">
-                                                            <span>IGST:</span>
-                                                            <input type="number" x-model="tax.igst" name="igst"
-                                                                class="w-1/4 ml-2 dark:bg-gray-700 dark:text-white"
-                                                                readonly>
-                                                        </div>
                                                     </td>
                                                 </tr>
-                                                <!-- Optional Expense Row -->
-                                                <template x-for="(expense, eindex) in expenses" :key="eindex">
+                                                <template x-if="isSameState">
                                                     <tr>
-                                                        <td colspan="8" class="border px-4 py-2">
-                                                            <div class="flex justify-between">
-                                                                <input type="text" x-model="expense.description"
-                                                                    :name="'expenses[' + eindex + '][description]'"
-                                                                    class="w-1/2 dark:bg-gray-700 dark:text-white"
-                                                                    list="expense_types" required>
-                                                                <datalist id="expense_types">
-                                                                    <option value="Travel Expense">Travel Expense</option>
-                                                                    <option value="Service Expense">Service Expense
-                                                                    </option>
-                                                                    <option value="Installation Fee">Installation Fee
-                                                                    </option>
-                                                                    <option value="Convenience Fee">Convenience Fee
-                                                                    </option>
-                                                                </datalist>
-                                                                <input type="number" x-model="expense.amount"
-                                                                    :name="'expenses[' + eindex + '][amount]'"
-                                                                    class="w-1/4 ml-2 dark:bg-gray-700 dark:text-white"
-                                                                    @input="calculateTotal" required>
-                                                                <button type="button"
-                                                                    class="bg-red-500 text-white px-2 py-1 rounded"
-                                                                    @click="removeExpenseRow(eindex)">Remove</button>
-                                                            </div>
+                                                        <td colspan="6" class="border-l border-b px-4 py-2 text-right">
+                                                            CGST:</td>
+                                                        <td colspan="2" class="border-b border-r px-4 py-2">
+                                                            <input type="number" x-model="tax.cgst" name="cgst"
+                                                                class="w-full dark:bg-gray-700 dark:text-white" readonly>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="6" class="border-l border-b px-4 py-2 text-right">
+                                                            SGST:</td>
+                                                        <td colspan="2" class="border-b border-r px-4 py-2">
+                                                            <input type="number" x-model="tax.sgst" name="sgst"
+                                                                class="w-full dark:bg-gray-700 dark:text-white" readonly>
                                                         </td>
                                                     </tr>
                                                 </template>
+                                                <template x-if="!isSameState">
+                                                    <tr>
+                                                        <td colspan="6" class="border-l border-b px-4 py-2 text-right">
+                                                            IGST:</td>
+                                                        <td colspan="2" class="border-b border-r px-4 py-2">
+                                                            <input type="number" x-model="tax.igst" name="igst"
+                                                                class="w-full dark:bg-gray-700 dark:text-white" readonly>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                                <!-- Total Amount Row -->
                                                 <tr>
-                                                    <td colspan="8" class="border px-4 py-2">
-                                                        <button type="button"
-                                                            class="bg-blue-500 text-white px-4 py-2 rounded"
-                                                            @click="addExpenseRow">Add Expense</button>
+                                                    <td colspan="6"
+                                                        class="border-l border-b px-4 py-2 text-right font-bold">Total:
                                                     </td>
-                                                </tr>
-                                                <!-- Sum Total Row -->
-                                                <tr>
-                                                    <td colspan="7" class="border px-4 py-2 text-right font-bold">
-                                                        Total:</td>
-                                                    <td class="border px-4 py-2">
+                                                    <td colspan="2" class="border-b border-r px-4 py-2">
                                                         <input type="number" x-model="total" name="total"
                                                             class="w-full dark:bg-gray-700 dark:text-white" readonly>
                                                     </td>
                                                 </tr>
-                                                <!-- Rounded off Amount -->
+                                                <!-- Rounded Off Amount -->
                                                 <tr>
                                                     <td colspan="6" class="border-l border-b px-4 py-2 text-right">
-                                                        Rounded off Amount:</td>
-                                                    <td colspan="2" class="border-b border-r px-4 py-2">
+                                                        Rounded off Amount:
+                                                    </td>
+                                                    <td colspan="2" class="border-r border-b px-4 py-2">
                                                         <input type="number"
                                                             x-model="(Math.round(total) - total).toFixed(3)"
                                                             name="round_off_total"
@@ -215,55 +219,12 @@
                                         <div class="mt-4">
                                             <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded"
                                                 @click="addRow">Add Row</button>
+                                            <button type="button" class="bg-yellow-500 text-white px-4 py-2 rounded ml-4"
+                                                @click="addExpense">Add Expense</button>
                                             <button type="submit"
                                                 class="bg-green-500 text-white px-4 py-2 rounded ml-4">Submit</button>
                                         </div>
                                     </form>
-
-                                    <!-- Modal for confirmation -->
-                                    <div x-show="showModal" class="fixed z-10 inset-0 overflow-y-auto"
-                                        aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                                        <div
-                                            class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                                            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-                                                aria-hidden="true"></div>
-                                            <span class="hidden sm:inline-block sm:align-middle sm:h-screen"
-                                                aria-hidden="true">&#8203;</span>
-                                            <div
-                                                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                                                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                                                    <div class="sm:flex sm:items-start">
-                                                        <div
-                                                            class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                                                            <svg class="h-6 w-6 text-red-600" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor"
-                                                                aria-hidden="true">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                            </svg>
-                                                        </div>
-                                                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                                            <h3 class="text-lg leading-6 font-medium text-gray-900"
-                                                                id="modal-title">Remove Item</h3>
-                                                            <div class="mt-2">
-                                                                <p class="text-sm text-gray-500">Are you sure you want to
-                                                                    remove this item? This action cannot be undone.</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                                                    <button type="button"
-                                                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
-                                                        @click="confirmDelete">Remove</button>
-                                                    <button type="button"
-                                                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                                                        @click="cancelDelete">Cancel</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
                                 </div>
 
                                 <script>
@@ -275,59 +236,49 @@
                                                 hsn_sac: '',
                                                 quantity: 1,
                                                 rate: null,
-                                                discount_type: 'percentage',
                                                 discount: 0,
+                                                discount_type: 'percentage',
                                                 amount: null
                                             }],
                                             expenses: [],
                                             tax: {
                                                 description: '',
-                                                rate: null,
                                                 amount: null,
                                                 cgst: null,
                                                 sgst: null,
                                                 igst: null
                                             },
-                                            total: null,
-                                            showModal: false,
-                                            deleteIndex: null,
-                                            isSameState: false,
+                                            isSameState: true, // assuming you have a way to determine if states are same or different
+                                            total: 0,
                                             addRow() {
                                                 this.rows.push({
                                                     description: '',
                                                     hsn_sac: '',
                                                     quantity: 1,
                                                     rate: null,
-                                                    discount_type: 'percentage',
                                                     discount: 0,
+                                                    discount_type: 'percentage',
                                                     amount: null
                                                 });
                                             },
-                                            confirmRemoveRow(index) {
-                                                this.deleteIndex = index;
-                                                this.showModal = true;
-                                            },
-                                            removeExpenseRow(eindex) {
-                                                this.expenses.splice(eindex, 1);
-                                                this.calculateTotal();
-                                            },
-                                            confirmDelete() {
-                                                if (this.deleteIndex !== null) {
-                                                    this.rows.splice(this.deleteIndex, 1);
-                                                    this.deleteIndex = null;
-                                                    this.calculateTotal();
-                                                }
-                                                this.showModal = false;
-                                            },
-                                            cancelDelete() {
-                                                this.deleteIndex = null;
-                                                this.showModal = false;
-                                            },
-                                            addExpenseRow() {
+                                            addExpense() {
                                                 this.expenses.push({
                                                     description: '',
-                                                    amount: null
+                                                    amount: 0
                                                 });
+                                            },
+                                            removeExpenseRow(index) {
+                                                this.expenses.splice(index, 1);
+                                                this.calculateTotal();
+                                            },
+                                            confirmRemoveRow(index) {
+                                                if (confirm('Are you sure you want to remove this item?')) {
+                                                    this.removeRow(index);
+                                                }
+                                            },
+                                            removeRow(index) {
+                                                this.rows.splice(index, 1);
+                                                this.calculateTotal();
                                             },
                                             updateItem(index) {
                                                 let selectedItem = this.items.find(item => item.name === this.rows[index].description);
@@ -339,36 +290,37 @@
                                             },
                                             calculateAmount(index) {
                                                 let row = this.rows[index];
-                                                let discount = row.discount_type === 'percentage' ? (row.rate * row.quantity) * (row.discount / 100) :
-                                                    row.discount;
-                                                let amount = (row.rate * row.quantity) - discount;
+                                                let discountAmount = row.discount_type === 'percentage' ? (row.rate * row.quantity * row.discount) /
+                                                    100 : row.discount;
+                                                let amount = (row.rate * row.quantity) - discountAmount;
                                                 row.amount = amount > 0 ? amount : 0;
                                                 this.calculateTotal();
                                             },
                                             updateTax() {
                                                 let taxValue = this.tax.description.replace('%', '');
-                                                this.tax.rate = parseFloat(taxValue) || 0;
+                                                let taxPercentage = parseFloat(taxValue) || 0;
+                                                this.tax.amount = this.rows.reduce((sum, row) => sum + row.amount, 0) * (taxPercentage / 100);
+                                                if (this.isSameState) {
+                                                    this.tax.cgst = this.tax.amount / 2;
+                                                    this.tax.sgst = this.tax.amount / 2;
+                                                    this.tax.igst = 0;
+                                                } else {
+                                                    this.tax.cgst = 0;
+                                                    this.tax.sgst = 0;
+                                                    this.tax.igst = this.tax.amount;
+                                                }
                                                 this.calculateTotal();
                                             },
                                             calculateTotal() {
                                                 let subtotal = this.rows.reduce((sum, row) => sum + row.amount, 0);
-                                                let taxAmount = subtotal * (this.tax.rate / 100);
-                                                this.tax.amount = taxAmount;
-                                                if (this.isSameState) {
-                                                    this.tax.cgst = taxAmount / 2;
-                                                    this.tax.sgst = taxAmount / 2;
-                                                    this.tax.igst = null;
-                                                } else {
-                                                    this.tax.cgst = null;
-                                                    this.tax.sgst = null;
-                                                    this.tax.igst = taxAmount;
-                                                }
-                                                let expenseTotal = this.expenses.reduce((sum, expense) => sum + expense.amount, 0);
-                                                this.total = subtotal + taxAmount + expenseTotal;
+                                                let totalExpenses = this.expenses.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
+                                                let taxAmount = this.tax.amount || 0;
+                                                this.total = subtotal + taxAmount + totalExpenses;
                                             }
                                         }
                                     }
                                 </script>
+
 
 
 
